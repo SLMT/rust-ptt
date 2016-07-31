@@ -10,9 +10,18 @@ Rust 語言具有不會有 Segmentation Falut、不需自己管理記憶體 (但
 
 Rust 語言目前由 [Mozilla 公司][4]開發維護，並且正以 Rust 與開發 [Firefox][5] 的經驗，重新撰寫新的[瀏覽器核心][6]。現在也有其它專案正在重新以 Rust 替換掉原本以 C 撰寫的程式。
 
+## Design Choices
+
+以下的 Design Choices 主要是因為我基於有在[開發資料庫系統][7]的經驗，比較熟捻 multi-threading 的技巧，而做出來的選擇。
+
+- 使用 Shared Memory，而不是 Message Passing
+- 使用 Thread-based，而不是 Fork-based (Multi-processes)
+
+
 [1]: https://www.ptt.cc/index.html
 [2]: https://github.com/ptt/pttbbs
 [3]: https://www.rust-lang.org/en-US/
 [4]: http://mozilla.com.tw/
 [5]: https://www.mozilla.org/zh-TW/firefox/new/
 [6]: https://github.com/servo/servo
+[7]: https://github.com/vanilladb/vanillacore
