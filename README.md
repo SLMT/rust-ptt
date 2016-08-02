@@ -1,5 +1,7 @@
 # PTT BBS in Rust
 
+[![Build Status](https://travis-ci.org/SLMT/rust-ptt.svg?branch=master)](https://travis-ci.org/SLMT/rust-ptt)
+
 這個 Project 的目標在於使用 [Rust][3] 這個全新的 System Language 來重新撰寫 PTT。
 
 ## Why Rust ?
@@ -17,6 +19,11 @@ Rust 語言目前由 [Mozilla 公司][4]開發維護，並且正以 Rust 與開�
 - 使用 Shared Memory，而不是 Message Passing
 - 使用 Thread-based，而不是 Fork-based (Multi-processes)
 
+## Current Status
+
+現在這個程式具有一個基本的 TCP Server，聆聽 54321 port，可以接受外部連線。
+
+接受到一筆連線後，印出 client 的地址即結束連線。
 
 [1]: https://www.ptt.cc/index.html
 [2]: https://github.com/ptt/pttbbs
