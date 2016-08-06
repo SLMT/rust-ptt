@@ -1,5 +1,9 @@
+
 use std::net::{TcpListener, TcpStream};
 use std::thread;
+use std::io::Read;
+
+mod telnet;
 
 fn main() {
     // TODO: Read program arguments
@@ -35,8 +39,16 @@ fn start_tcp_server(port: u16) {
     }
 }
 
-fn start_tcp_connection(stream: TcpStream) {
+fn start_tcp_connection(mut stream: TcpStream) {
     // Print IP Address
     let addr = stream.peer_addr().unwrap();
     println!("Start a connection to {}", addr);
+
+    // Initialize telnet
+    telnet::initialize(&mut stream);
+
+    // Receive bytes
+    for byte in stream.bytes() {
+        println!("{}", byte.unwrap());
+    }
 }
