@@ -5,6 +5,8 @@ use std::io::Read;
 
 mod telnet;
 
+use telnet::TelnetConnection;
+
 fn main() {
     // TODO: Read program arguments
 
@@ -13,13 +15,6 @@ fn main() {
     // TODO: Initialize a connection listener according to settings
     // TODO: Need different types of connection
     start_tcp_server(54321);
-
-    // TODO: Initialize terminal for the user
-
-    // TODO: Let the user login
-
-    // TODO: Enter main menu
-
 }
 
 fn start_tcp_server(port: u16) {
@@ -45,10 +40,16 @@ fn start_tcp_connection(mut stream: TcpStream) {
     println!("Start a connection to {}", addr);
 
     // Initialize telnet
-    telnet::initialize(&mut stream);
+    let mut telnet_conn = TelnetConnection::new(&mut stream);
 
-    // Receive bytes
+    // TODO: Initialize terminal for the user
+
+    // TODO: Let the user login
+
+    // TODO: Enter main menu
+
+    // XXX: Debug: receive bytes
     for byte in stream.bytes() {
-        println!("{}", byte.unwrap());
+        telnet_conn.process(byte.unwrap());
     }
 }
