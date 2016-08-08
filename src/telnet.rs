@@ -10,9 +10,12 @@ use std::io::Write;
 
 // Telnet Commands (only implement necessary commands)
 const IAC: u8 = 255;    // interpret as command:
+const DONT: u8 = 254;   // you are not to use option
 const DO: u8 = 253;     // please, you use option
+const WONT: u8 = 252;   // I won't use option
 const WILL: u8 = 251;   // I will use option
 const SB: u8 = 250;     // interpret as subnegotiation
+const AYT: u8 = 246;    // are you there
 const SE: u8 = 240;     // end sub negotiation
 
 // Telnet Options (only provide necessary options)
@@ -27,16 +30,22 @@ const QUAL_SEND: u8 = 1;    // send option
 
 enum ProcessState {
     None,
-    WaitForCommand
+    WaitForCommand,
+    SubNegotiation
 }
 
 pub struct TelnetConnection {
+    // Callbacks
+    cb_resize_term: Option<fn(u32, u32)>,
+
     // Processing States
-    process_state: ProcessState
+    process_state: ProcessState,
+    process_buffer: Vec<u8>
 }
 
 impl TelnetConnection {
-    pub fn new(stream: &mut TcpStream) -> TelnetConnection {
+    pub fn new(stream: &mut TcpStream, cb_resize_term: Option<fn(u32, u32)>) -> TelnetConnection {
+        // Send initial message
         let init_msg: &[u8] = &[
             IAC, DO, OPT_TTYPE,
             IAC, SB, OPT_TTYPE, QUAL_SEND, IAC, SE,
@@ -54,26 +63,86 @@ impl TelnetConnection {
 
         // Return a new connection
         TelnetConnection {
-            process_state: ProcessState::None
+            cb_resize_term: cb_resize_term,
+            process_state: ProcessState::None,
+            process_buffer: Vec::new()
         }
     }
 
     pub fn process(&mut self, byte: u8) {
-        // Change to "wait for command" state when receiving IAC
-        if byte == IAC {
-            self.process_state = ProcessState::WaitForCommand;
-            return;
-        }
+        // println!("Get byte: {}", byte);
 
+        // Process Commands
         match self.process_state {
+            // Wait for a command
             ProcessState::WaitForCommand => {
-                println!("{}", byte);
-            }
+                self.process_state = ProcessState::None;
 
-            ProcessState::None => {
-                // Do Nothing
+                match byte {
+                    IAC => {}, // TODO: Should throw an error
+                    AYT => {}, // TODO: Response
+                    DONT | DO | WONT | WILL => {}, // TODO: Wait for implementation
+                    SB => {
+                        self.process_state = ProcessState::SubNegotiation;
+                    },
+                    SE => {
+                        self.process_subnegotiation();
+                    },
+                    _ => {} // TODO: Default action
+                }
+            },
+
+            // Sub-negotiation
+            ProcessState::SubNegotiation => match byte {
+                IAC => {
+                    // Change to "wait for command" state when receiving IAC
+                    self.process_state = ProcessState::WaitForCommand;
+                },
+                _ => {
+                    self.process_buffer.push(byte);
+                }
+            },
+
+            // Not in any state
+            ProcessState::None => match byte {
+                IAC => {
+                    // Change to "wait for command" state when receiving IAC
+                    self.process_state = ProcessState::WaitForCommand;
+                },
+                _ => {} // TODO: Default action
             }
         }
     }
 
+    pub fn process_subnegotiation(&mut self) {
+        let buf = &mut self.process_buffer;
+        let option = buf[0];
+
+        // println!("Option: {}", option);
+        match option {
+            // Resize terminal
+            OPT_NAWS => {
+                // Get the width and the height
+                let width = ((buf[1] as u32) << 8) + (buf[2] as u32);
+                let height = ((buf[3] as u32) << 8) + (buf[4] as u32);
+
+                // Call term_resize callback
+                match self.cb_resize_term {
+                    Some(cb) => cb(width, height),
+                    None => {} // Do Nothing
+                }
+
+                // TODO: Call update client code callback
+            },
+
+            // Terminal Type
+            OPT_TTYPE => {}, // TODO: Wait for implementation
+
+            // Default
+            _ => {} // TODO: Default action
+        }
+
+        // Clear the buffer
+        buf.clear();
+    }
 }

@@ -23,7 +23,7 @@ Rust 語言目前由 [Mozilla 公司][4]開發維護，並且正以 Rust 與開�
 
 現在這個程式具有一個基本的 TCP Server，聆聽 54321 port，可以接受外部連線。
 
-接受到一筆連線後，會送出一些 telnet 的指令，並有個無限迴圈會持續印出 client 送出的內容。
+接受到一筆連線後，會送出一些 telnet 的指令，並持續接收 client 的回覆。其中收到重設終端機大小的回覆之後，會將指定的大小印出來。(已經過 PCMan Client 測試)
 
 [1]: https://www.ptt.cc/index.html
 [2]: https://github.com/ptt/pttbbs

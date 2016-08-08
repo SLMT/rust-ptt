@@ -40,7 +40,7 @@ fn start_tcp_connection(mut stream: TcpStream) {
     println!("Start a connection to {}", addr);
 
     // Initialize telnet
-    let mut telnet_conn = TelnetConnection::new(&mut stream);
+    let mut telnet_conn = TelnetConnection::new(&mut stream, Some(resize_term));
 
     // TODO: Initialize terminal for the user
 
@@ -52,4 +52,8 @@ fn start_tcp_connection(mut stream: TcpStream) {
     for byte in stream.bytes() {
         telnet_conn.process(byte.unwrap());
     }
+}
+
+fn resize_term(width: u32, height: u32) {
+    println!("Width: {}, Height: {}", width, height);
 }
