@@ -40,14 +40,14 @@ Compiling rust-ptt v0.1.0 (file:///some-places/rust-ptt)
 Running `target/debug/rust-ptt`
 ```
 
-然後隨便找一個拿來連 PTT 的 client 或者 telnet client 來連上 server (網址：localhost:54321)，此時 server 這邊應該會顯示：
+然後隨便找一個拿來連 PTT 的 client 或者 telnet client 來連上 server (網址：`localhost:54321`)，此時 server 這邊應該會顯示：
 
 ```
 Start a connection to 127.0.0.1:54689
 Width: 80, Height: 24
 ```
 
-這個訊息代表 client 的 address，以及 client 請求的 terminal 大小。注意 address 不一定會這個例子相同，而且顯示的長寬也會隨著你的 client 的設定而有所不同。
+這個訊息代表 client 的 address，以及 client 請求的 terminal 大小。注意 address 不一定會這個例子相同，而且顯示的長寬也會隨著你的 client 的設定而有所不同。Client 方面暫時不會顯示任何資訊。
 
 [1]: https://www.ptt.cc/index.html
 [2]: https://github.com/ptt/pttbbs
