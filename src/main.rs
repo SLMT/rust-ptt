@@ -4,8 +4,11 @@ use std::thread;
 use std::io::Read;
 
 mod telnet;
+mod terminal;
+mod terminal_utils;
 
 use telnet::TelnetConnection;
+use terminal::Terminal;
 
 fn main() {
     // TODO: Read program arguments
@@ -39,12 +42,21 @@ fn start_tcp_connection(mut stream: TcpStream) {
     let addr = stream.peer_addr().unwrap();
     println!("Start a connection to {}", addr);
 
+    // TODO: These should be a part of program options
+    let width = 80;
+    let height = 24;
+
     // Initialize telnet
     let mut telnet_conn = TelnetConnection::new(&mut stream, Some(resize_term));
 
     // TODO: Initialize terminal for the user
+    let term = initialize_term(width, height);
+
+    // TODO: Initialize many things written in start_client() of mbbsd.c
 
     // TODO: Let the user login
+
+    // TODO: Initialize other things after logging in
 
     // TODO: Enter main menu
 
@@ -56,4 +68,25 @@ fn start_tcp_connection(mut stream: TcpStream) {
 
 fn resize_term(width: u32, height: u32) {
     println!("Width: {}, Height: {}", width, height);
+}
+
+// TODO: Terminal mode ?
+fn initialize_term(width: u32, height: u32) -> Terminal {
+    // TODO: System initialization for the terminal (register signal for resizing)
+
+    // Create a terminal object
+    let term = Terminal::new(width, height);
+
+    // TODO: Resize the terminal
+    // We really need to do this ? Even we have already passed the arguments to the constructor ?
+
+    // TODO: Send resizing signal
+
+    term
+}
+
+fn login_query() {
+    // TODO: Print the welcome screen
+
+    // TODO: Do other things of login_query() in mbbsd.c
 }
