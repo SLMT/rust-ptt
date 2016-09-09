@@ -5,7 +5,6 @@ use std::io::Read;
 
 mod telnet;
 mod terminal;
-mod terminal_utils;
 
 use telnet::TelnetConnection;
 use terminal::Terminal;
@@ -71,7 +70,7 @@ fn resize_term(width: u32, height: u32) {
 }
 
 // TODO: Terminal mode ?
-fn initialize_term(width: u32, height: u32) -> Terminal {
+fn initialize_term(width: usize, height: usize) -> Terminal {
     // TODO: System initialization for the terminal (register signal for resizing)
 
     // Create a terminal object

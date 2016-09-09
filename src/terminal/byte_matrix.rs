@@ -27,8 +27,17 @@ impl ByteMatrix {
         self.data[r * cols + c] = new_val;
     }
 
-    /// Set all entries of a specified row with the given value
-    /// TODO: If we could use memset(), we might get better performance
+    /// Set all entries in a givne range of a specified row with a given value
+    /// XXX: If we could use memset(), we might get better performance
+    pub fn set_bytes(&mut self, r: usize, start_c: usize, num: usize, new_val: u8) {
+        let start = r * self.cols + start_c;
+        for c in 0 .. num {
+            self.data[start + c] = new_val;
+        }
+    }
+
+    /// Set all entries of a specified row with a given value
+    /// XXX: If we could use memset(), we might get better performance
     pub fn set_row(&mut self, r: usize, new_val: u8) {
         let cols = self.cols;
         let start = r * cols;

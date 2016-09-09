@@ -2,7 +2,8 @@
 mod byte_matrix;
 
 use std::mem;
-use byte_matrix::ByteMatrix;
+
+use self::byte_matrix::ByteMatrix;
 
 // Macros
 macro_rules! ranged {
@@ -17,9 +18,10 @@ macro_rules! ranged {
 // Special Characters
 const CHAR_ERASE: u8 = ' ' as u8;
 const ATTR_ERASE: u8 = 0x07;
+const ATTR_DEFAULT: u8 = ATTR_ERASE;
 
 const CHAR_TAB: u8 = '\t' as u8;
-const CHAR_BACK: u8 = '\b' as u8;
+const CHAR_BACK: u8 = 0x08 as u8;
 const CHAR_ESC: u8 = '\x1b' as u8;
 const CHAR_RETURN: u8 = '\r' as u8;
 const CHAR_NEWLINE: u8 = '\n' as u8;
@@ -32,6 +34,9 @@ pub struct Terminal {
     char_map: ByteMatrix, // character map
     attr_map: ByteMatrix, // attribute map
 
+    // Attribute
+    attribute: u8,
+
     // The size of the terminal
     rows: usize, cols: usize,
 
@@ -40,6 +45,9 @@ pub struct Terminal {
 
     // Is dirty ?
     dirty: bool,
+
+    // Escape commands buffer
+    commands: Vec<u8>
 }
 
 impl Terminal {
@@ -49,9 +57,12 @@ impl Terminal {
             char_map: ByteMatrix::new(row_count, col_count),
             attr_map: ByteMatrix::new(row_count, col_count),
 
+            attribute: ATTR_DEFAULT,
             rows: row_count, cols: col_count,
             x: 0, y: 0,
             dirty: false,
+
+            commands: Vec::new()
 
             // TODO: There are some other variables
         };
@@ -137,20 +148,46 @@ impl Terminal {
         // Mark as dirty
         self.mark_dirty();
 
-        // TODO: Process escape commands
+        // Process escape commands
+        if !self.commands.is_empty() {
+            // TODO: Implement it
+        }
 
         // TODO: Process the char
         match ch {
             CHAR_ESC => {
-                // TODO: Implement it
+                // Start escaped commands
+                self.commands.push(ch);
             },
             CHAR_TAB => {
-                // TODO: Implement it
+                // Tab: Move by 8 chars
+                let mut new_x = self.x;
+                if new_x % 8 == 0 {
+                    new_x += 8;
+                } else {
+                    new_x += (8 - (new_x % 8));
+                }
+                new_x = ranged!(new_x, 0, self.cols - 1);
+
+                // Erase the characters
+                if new_x > self.x {
+                    let cur_row = self.y;
+                    let start_col = self.x;
+                    let num = new_x - start_col;
+                    let attr = self.attribute;
+
+                    self.char_map.set_bytes(cur_row, start_col, num, CHAR_ERASE);
+                    self.attr_map.set_bytes(cur_row, start_col, num, attr);
+                }
+
+                // Assign new x
+                self.x = new_x;
             },
             CHAR_BACK => {
-                // TODO: Implement it
+                // Move back by 1
+                self.x = ranged!(self.x - 1, 0, self.cols - 1);
             },
-            CHAR_RETURN || CHAR_NEWLINE => {
+            CHAR_RETURN | CHAR_NEWLINE => {
                 // TODO: Implement it
             },
             _ => {
