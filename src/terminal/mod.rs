@@ -133,6 +133,16 @@ impl Terminal {
         self.mark_dirty();
     }
 
+    /// Clear to the end of the line
+    pub fn clrtoeol(&mut self) {
+        // TODO: Do we need to check x, y here ?
+        let x = self.x;
+        let y = self.y;
+        self.char_map.set_to_row_end(y, x, CHAR_ERASE);
+        self.attr_map.set_to_row_end(y, x, ATTR_ERASE);
+        self.mark_dirty();
+    }
+
     /// Output a string
     pub fn outs(&mut self, s: &str) {
         // TODO: Implement this
@@ -188,10 +198,43 @@ impl Terminal {
                 self.x = ranged!(self.x - 1, 0, self.cols - 1);
             },
             CHAR_RETURN | CHAR_NEWLINE => {
-                // TODO: Implement it
+                // New line: only move the cursor to the next line
+                self.clrtoeol();
+                self.x = 0;
+                self.y += 1;
+
+                // XXX: The implementation here is slightly different from the one of pfterm.c in pttbbs
+                if self.y >= self.rows {
+                    self.y = self.rows - 1;
+                }
+            },
+            _ if (ch as char).is_control() => {
+                // Non-control characters: save the character
+
+                // TODO: Check if self.x is the range (necessary ?)
+
+                let mut col = self.x;
+                let mut row = self.y;
+                let attr = self.attribute;
+                self.char_map.set(row, col, ch);
+                self.attr_map.set(row, col, attr);
+
+                // Move the cursor
+                col += 1;
+                if col >= self.cols {
+                    self.x = 0;
+
+                    // XXX: The implementation here is slightly different from the one of pfterm.c in pttbbs
+                    row += 1;
+                    if row < self.rows {
+                        self.y = row;
+                    }
+                } else {
+                    self.x = col;
+                }
             },
             _ => {
-                // TODO: Implement it (two cases: control characters or normal character)
+                // If it is other control character, do nothing
             }
         }
     }

@@ -36,6 +36,15 @@ impl ByteMatrix {
         }
     }
 
+    /// Set the entries in a row from the given start index to the end
+    /// XXX: If we could use memset(), we might get better performance
+    pub fn set_to_row_end(&mut self, r: usize, start_c: usize, new_val: u8) {
+        let start = r * self.cols;
+        for c in start .. self.cols {
+            self.data[start + c] = new_val;
+        }
+    }
+
     /// Set all entries of a specified row with a given value
     /// XXX: If we could use memset(), we might get better performance
     pub fn set_row(&mut self, r: usize, new_val: u8) {
