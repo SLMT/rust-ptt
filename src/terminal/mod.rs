@@ -145,13 +145,15 @@ impl Terminal {
 
     /// Output a string
     pub fn outs(&mut self, s: &str) {
-        // TODO: Implement this
+        for c in s.chars() {
+            outc(c);
+        }
     }
 
     /// Output a character
     pub fn outc(&mut self, ch: u8) {
         // TODO: Ignore 0x00 and 0xFF (Invalid)
-        if ch == 0x00 || ch == 0x00 {
+        if ch == 0x00 || ch == 0xFF {
             return;
         }
 
@@ -237,6 +239,10 @@ impl Terminal {
                 // If it is other control character, do nothing
             }
         }
+    }
+
+    fn process_command() {
+        // TODO: Implement this method
     }
 
     // TODO: Implement other APIs
