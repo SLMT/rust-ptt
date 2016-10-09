@@ -1,5 +1,6 @@
 
 mod byte_matrix;
+mod ansi_escape;
 
 use std::mem;
 
@@ -22,7 +23,6 @@ const ATTR_DEFAULT: u8 = ATTR_ERASE;
 
 const CHAR_TAB: u8 = '\t' as u8;
 const CHAR_BACK: u8 = 0x08 as u8;
-const CHAR_ESC: u8 = '\x1b' as u8;
 const CHAR_RETURN: u8 = '\r' as u8;
 const CHAR_NEWLINE: u8 = '\n' as u8;
 
@@ -146,13 +146,13 @@ impl Terminal {
     /// Output a string
     pub fn outs(&mut self, s: &str) {
         for c in s.chars() {
-            outc(c);
+            self.outc(c as u8);
         }
     }
 
     /// Output a character
     pub fn outc(&mut self, ch: u8) {
-        // TODO: Ignore 0x00 and 0xFF (Invalid)
+        // Ignore 0x00 and 0xFF (Invalid)
         if ch == 0x00 || ch == 0xFF {
             return;
         }
@@ -160,15 +160,26 @@ impl Terminal {
         // Mark as dirty
         self.mark_dirty();
 
-        // Process escape commands
+        // For escape command
         if !self.commands.is_empty() {
-            // TODO: Implement it
+            // Collects command characters
+            self.commands.push(ch);
+
+            // For CSI commands, there will be more than 2 characters
+            if (self.commands.len() == 2 && ch == ansi_escape::CSI_START_CH) ||
+                ansi_escape::is_csi_parameter(ch) {
+                    return;
+                }
+
+            // Processes the command
+            self.execute();
+            self.commands.clear();
         }
 
-        // TODO: Process the char
+        // Process the char
         match ch {
-            CHAR_ESC => {
-                // Start escaped commands
+            ansi_escape::ESC_START_CH => {
+                // The starting of escaped commands
                 self.commands.push(ch);
             },
             CHAR_TAB => {
@@ -213,7 +224,7 @@ impl Terminal {
             _ if (ch as char).is_control() => {
                 // Non-control characters: save the character
 
-                // TODO: Check if self.x is the range (necessary ?)
+                // TODO: Check if self.x is in the range (necessary ?)
 
                 let mut col = self.x;
                 let mut row = self.y;
@@ -236,13 +247,9 @@ impl Terminal {
                 }
             },
             _ => {
-                // If it is other control character, do nothing
+                // If it is other control character, ignore it
             }
         }
-    }
-
-    fn process_command() {
-        // TODO: Implement this method
     }
 
     // TODO: Implement other APIs
@@ -250,5 +257,10 @@ impl Terminal {
     /// Mark as dirty
     fn mark_dirty(&mut self) {
         self.dirty = true;
+    }
+
+    /// Executes the stored escape command
+    fn execute(&mut self) {
+        // TODO: Implement this
     }
 }
